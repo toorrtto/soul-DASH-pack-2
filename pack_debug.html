@@ -1,0 +1,920 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<title>Soul Dash — Pack Opener</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@600;900&family=Crimson+Pro:ital,wght@0,400;0,600;1,400&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+:root{
+  --bg:#07070f;--surface:#0f0f1e;--surface2:#181828;--surface3:#202038;
+  --border:#2d2d52;--border2:#3d3d6a;
+  --accent:#8b72f8;--accent2:#6252d8;
+  --gold:#e8b84b;--gold2:#c89a30;
+  --text:#ddddf5;--muted:#7878a8;--dim:#4a4a72;
+  --red:#e05555;--green:#4caf7d;--blue:#5588e8;--purple:#b872e8;
+  --radius:12px;
+}
+html,body{height:100%;background:var(--bg);color:var(--text);font-family:'Crimson Pro',Georgia,serif;font-size:16px;-webkit-font-smoothing:antialiased;overflow-x:hidden}
+h1,h2,h3,.cinzel{font-family:'Cinzel',serif}
+::-webkit-scrollbar{width:4px}
+::-webkit-scrollbar-thumb{background:var(--border2);border-radius:2px}
+
+/* ── Layout ── */
+#app{display:flex;flex-direction:column;min-height:100vh;min-height:-webkit-fill-available}
+header{
+  position:sticky;top:0;z-index:50;
+  background:linear-gradient(180deg,#0f0f22 0%,rgba(7,7,15,.96) 100%);
+  border-bottom:1px solid var(--border);
+  padding:0 16px;padding-top:env(safe-area-inset-top);
+}
+.header-inner{display:flex;align-items:center;justify-content:space-between;height:56px}
+.logo{display:flex;align-items:center;gap:10px}
+.logo-icon{
+  width:32px;height:32px;border-radius:8px;
+  background:linear-gradient(135deg,#8b72f8,#e8b84b);
+  display:flex;align-items:center;justify-content:center;
+  font-family:'Cinzel',serif;font-weight:900;font-size:16px;color:#fff;
+  box-shadow:0 0 14px rgba(139,114,248,.5);flex-shrink:0;
+}
+.logo-text{
+  font-family:'Cinzel',serif;font-size:16px;font-weight:900;letter-spacing:.08em;
+  background:linear-gradient(90deg,#e8b84b,#8b72f8);
+  -webkit-background-clip:text;-webkit-text-fill-color:transparent;
+}
+nav{display:flex;gap:4px}
+.tab-btn{
+  background:transparent;border:1px solid transparent;color:var(--muted);
+  font-family:'Cinzel',serif;font-size:11px;font-weight:600;letter-spacing:.04em;
+  padding:6px 10px;border-radius:8px;cursor:pointer;transition:all .2s;
+}
+.tab-btn.active{background:rgba(139,114,248,.15);color:var(--accent);border-color:#6252d8}
+
+main{flex:1;padding:20px 16px;padding-bottom:calc(20px + env(safe-area-inset-bottom));max-width:700px;margin:0 auto;width:100%}
+
+/* ── Buttons ── */
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:6px;padding:10px 18px;border-radius:var(--radius);font-family:'Cinzel',serif;font-size:13px;font-weight:600;letter-spacing:.04em;border:none;cursor:pointer;transition:all .2s;white-space:nowrap}
+.btn-primary{background:var(--accent2);color:#fff;border:1px solid var(--accent);box-shadow:0 0 12px rgba(139,114,248,.2)}
+.btn-primary:active{transform:scale(.97);background:var(--accent)}
+.btn-gold{background:rgba(232,184,75,.1);color:var(--gold);border:1px solid var(--gold2)}
+.btn-gold:active{background:rgba(232,184,75,.2)}
+.btn-ghost{background:var(--surface2);color:var(--muted);border:1px solid var(--border)}
+.btn-ghost:active{background:var(--surface3)}
+.btn-danger{background:rgba(224,85,85,.1);color:var(--red);border:1px solid rgba(224,85,85,.4)}
+.btn-danger:active{background:rgba(224,85,85,.2)}
+.btn-green{background:rgba(76,175,125,.1);color:var(--green);border:1px solid rgba(76,175,125,.35)}
+.btn-sm{padding:7px 14px;font-size:12px}
+.btn:disabled{opacity:.5;pointer-events:none}
+
+/* ── Forms ── */
+.form-group{display:flex;flex-direction:column;gap:6px;margin-bottom:14px}
+label{font-family:'Cinzel',serif;font-size:11px;color:var(--muted);letter-spacing:.06em}
+input,select,textarea{
+  font-family:'Crimson Pro',serif;font-size:16px;
+  background:var(--surface2);color:var(--text);
+  border:1px solid var(--border);border-radius:10px;
+  padding:11px 14px;outline:none;width:100%;
+  transition:border-color .2s,box-shadow .2s;
+  -webkit-appearance:none;appearance:none;
+}
+input:focus,select:focus,textarea:focus{border-color:var(--accent);box-shadow:0 0 0 3px rgba(139,114,248,.15)}
+select option{background:var(--surface2)}
+.form-row{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.form-row3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px}
+
+/* ── Modal ── */
+.modal-overlay{
+  position:fixed;inset:0;background:rgba(7,7,15,.88);
+  backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);
+  z-index:200;display:flex;align-items:flex-end;justify-content:center;
+  padding-bottom:env(safe-area-inset-bottom);animation:fadeIn .2s ease;
+}
+@keyframes fadeIn{from{opacity:0}to{opacity:1}}
+.modal{
+  background:var(--surface);border:1px solid var(--border2);
+  border-radius:20px 20px 0 0;padding:24px 20px;
+  width:100%;max-width:520px;max-height:92vh;overflow-y:auto;
+  animation:slideUp .25s ease;
+}
+@keyframes slideUp{from{opacity:0;transform:translateY(30px)}to{opacity:1;transform:translateY(0)}}
+.modal-handle{width:36px;height:4px;background:var(--border2);border-radius:2px;margin:0 auto 20px}
+.modal-title{font-family:'Cinzel',serif;font-size:17px;color:var(--gold);letter-spacing:.06em;margin-bottom:18px}
+.modal-actions{display:flex;gap:10px;margin-top:20px;padding-top:16px;border-top:1px solid var(--border)}
+.modal-actions .btn{flex:1}
+
+/* ── Misc ── */
+.section-title{font-family:'Cinzel',serif;font-size:17px;color:var(--gold);letter-spacing:.06em}
+.empty{display:flex;flex-direction:column;align-items:center;gap:8px;padding:50px 20px;color:var(--dim);text-align:center}
+.empty-icon{font-size:48px;opacity:.4}
+.empty p{font-size:17px;color:var(--muted)}
+.empty small{font-size:13px}
+.error-msg{color:var(--red);font-size:13px;margin-top:6px}
+.spinner{display:inline-block;width:16px;height:16px;border:2px solid rgba(255,255,255,.3);border-top-color:#fff;border-radius:50%;animation:spin .6s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+.loading-screen{display:flex;align-items:center;justify-content:center;height:60vh;flex-direction:column;gap:12px;color:var(--muted);font-family:'Cinzel',serif;font-size:14px}
+.section-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:16px}
+
+/* ── Pack opener ── */
+.opener-card{
+  background:var(--surface);border:1px solid var(--border2);border-radius:16px;
+  padding:20px;margin-bottom:16px;
+}
+.opener-title{font-family:'Cinzel',serif;font-size:13px;color:var(--muted);letter-spacing:.06em;margin-bottom:10px}
+.pack-count-row{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:4px}
+.pack-count-btn{
+  font-family:'Cinzel',serif;font-size:13px;font-weight:700;
+  background:var(--surface2);border:1px solid var(--border);border-radius:8px;
+  padding:8px 14px;cursor:pointer;color:var(--muted);transition:all .2s;
+}
+.pack-count-btn.active{background:rgba(139,114,248,.18);color:var(--accent);border-color:var(--accent)}
+.open-btn{
+  width:100%;margin-top:16px;padding:16px;font-size:16px;letter-spacing:.1em;
+  background:linear-gradient(135deg,var(--accent2),#4a3ab8);
+  color:#fff;border:1px solid var(--accent);border-radius:14px;
+  box-shadow:0 0 24px rgba(139,114,248,.3);cursor:pointer;
+  font-family:'Cinzel',serif;font-weight:900;transition:all .2s;
+}
+.open-btn:active{transform:scale(.98);box-shadow:0 0 40px rgba(139,114,248,.5)}
+.open-btn:disabled{opacity:.4;pointer-events:none}
+
+/* ── Card reveal ── */
+.reveal-overlay{
+  position:fixed;inset:0;background:rgba(4,4,12,.95);
+  z-index:300;display:flex;flex-direction:column;align-items:center;justify-content:center;
+  padding:20px;padding-top:env(safe-area-inset-top);
+  padding-bottom:env(safe-area-inset-bottom);
+}
+.reveal-header{font-family:'Cinzel',serif;font-size:13px;color:var(--muted);margin-bottom:24px;letter-spacing:.1em}
+.cards-stage{display:flex;gap:10px;justify-content:center;flex-wrap:wrap;margin-bottom:24px}
+.flip-card{
+  width:90px;height:130px;perspective:600px;cursor:pointer;flex-shrink:0;
+}
+.flip-card-inner{
+  position:relative;width:100%;height:100%;
+  transform-style:preserve-3d;transition:transform .5s cubic-bezier(.4,0,.2,1);
+}
+.flip-card.flipped .flip-card-inner{transform:rotateY(180deg)}
+.flip-card-front,.flip-card-back{
+  position:absolute;inset:0;border-radius:10px;
+  backface-visibility:hidden;-webkit-backface-visibility:hidden;
+  display:flex;flex-direction:column;align-items:center;justify-content:center;
+}
+.flip-card-front{
+  background:linear-gradient(135deg,#1a1040,#0f0820);
+  border:1px solid var(--border2);
+  box-shadow:0 0 14px rgba(139,114,248,.2);
+}
+.flip-card-front-inner{
+  width:70%;height:70%;border-radius:6px;
+  background:linear-gradient(135deg,#2a1860,#1a0e40);
+  border:1px solid rgba(139,114,248,.3);
+  display:flex;align-items:center;justify-content:center;
+  font-size:28px;
+}
+.flip-card-back{
+  transform:rotateY(180deg);
+  border:1px solid var(--border2);
+  padding:8px 6px;gap:4px;
+}
+.flip-card-rarity{
+  font-family:'Cinzel',serif;font-size:9px;font-weight:700;letter-spacing:.08em;
+  padding:2px 8px;border-radius:20px;
+}
+.flip-card-name{
+  font-family:'Cinzel',serif;font-size:10px;font-weight:700;
+  text-align:center;line-height:1.3;word-break:break-all;
+  color:var(--text);padding:0 4px;
+}
+.reveal-actions{display:flex;gap:10px}
+.reveal-skip{
+  font-family:'Cinzel',serif;font-size:12px;color:var(--dim);
+  background:transparent;border:1px solid var(--border);border-radius:8px;
+  padding:8px 16px;cursor:pointer;
+}
+.reveal-done{
+  font-family:'Cinzel',serif;font-size:14px;font-weight:700;
+  background:var(--accent2);color:#fff;border:1px solid var(--accent);
+  border-radius:10px;padding:10px 28px;cursor:pointer;
+  box-shadow:0 0 12px rgba(139,114,248,.3);display:none;
+}
+.pack-label{font-family:'Cinzel',serif;font-size:11px;color:var(--dim);margin-bottom:6px;letter-spacing:.06em}
+
+/* ── Rarity colors ── */
+.r-n  {background:rgba(136,136,176,.15);color:#9999bb;border:1px solid rgba(136,136,176,.4)}
+.r-r  {background:rgba(85,136,232,.15);color:#5588e8;border:1px solid rgba(85,136,232,.4)}
+.r-sr {background:rgba(184,114,232,.15);color:#b872e8;border:1px solid rgba(184,114,232,.4)}
+.r-lgr{background:rgba(232,184,75,.18);color:#e8b84b;border:1px solid rgba(232,184,75,.5)}
+.r-sr {background:rgba(184,114,232,.15);color:#b872e8;border:1px solid rgba(184,114,232,.4)}
+.r-vr {background:rgba(85,200,170,.15);color:#55c8aa;border:1px solid rgba(85,200,170,.4)}
+.r-r  {background:rgba(85,136,232,.15);color:#5588e8;border:1px solid rgba(85,136,232,.4)}
+.r-u  {background:rgba(224,85,85,.15);color:#e05555;border:1px solid rgba(224,85,85,.4)}
+.r-c  {background:rgba(136,136,176,.15);color:#9999bb;border:1px solid rgba(136,136,176,.4)}
+.r-default{background:rgba(100,100,150,.15);color:#8888bb;border:1px solid rgba(100,100,150,.4)}
+
+/* card back glow per rarity */
+.glow-n  {background:linear-gradient(135deg,#111122,#0d0d1a);border-color:rgba(136,136,176,.4)}
+.glow-r  {background:linear-gradient(135deg,#0d1830,#091020);border-color:rgba(85,136,232,.5);box-shadow:0 0 16px rgba(85,136,232,.25)}
+.glow-sr {background:linear-gradient(135deg,#180d2a,#100820);border-color:rgba(184,114,232,.5);box-shadow:0 0 16px rgba(184,114,232,.3)}
+.glow-lgr{background:linear-gradient(135deg,#1e1608,#120f04);border-color:rgba(232,184,75,.6);box-shadow:0 0 20px rgba(232,184,75,.4)}
+.glow-sr {background:linear-gradient(135deg,#180d2a,#100820);border-color:rgba(184,114,232,.5);box-shadow:0 0 16px rgba(184,114,232,.3)}
+.glow-vr {background:linear-gradient(135deg,#0d3028,#091820);border-color:rgba(85,200,170,.5);box-shadow:0 0 16px rgba(85,200,170,.25)}
+.glow-r  {background:linear-gradient(135deg,#0d1830,#091020);border-color:rgba(85,136,232,.5);box-shadow:0 0 16px rgba(85,136,232,.25)}
+.glow-u  {background:linear-gradient(135deg,#1e0808,#120404);border-color:rgba(224,85,85,.6);box-shadow:0 0 20px rgba(224,85,85,.4)}
+.glow-c  {background:linear-gradient(135deg,#111122,#0d0d1a);border-color:var(--border2)}
+.glow-default{background:linear-gradient(135deg,#111122,#0d0d1a);border-color:var(--border2)}
+
+/* ── Set cards ── */
+.set-card{
+  background:var(--surface);border:1px solid var(--border);border-radius:14px;
+  overflow:hidden;margin-bottom:12px;
+}
+.set-band{height:3px;background:linear-gradient(90deg,var(--accent2),var(--accent))}
+.set-header-row{
+  padding:12px 14px;display:flex;align-items:center;justify-content:space-between;
+  cursor:pointer;user-select:none;transition:background .15s;
+}
+.set-header-row:active{background:var(--surface2)}
+.set-name{font-family:'Cinzel',serif;font-size:15px;font-weight:700;flex:1}
+.set-meta{font-family:'Cinzel',serif;font-size:11px;color:var(--muted)}
+.set-body{padding:0 14px 14px;display:none}
+.card-row{
+  display:flex;align-items:center;gap:8px;padding:6px 0;
+  border-bottom:1px solid var(--border);font-size:13px;
+}
+.card-row:last-child{border-bottom:none}
+.card-row-name{flex:1;font-family:'Cinzel',serif;font-size:12px}
+.card-row-rarity{font-family:'Cinzel',serif;font-size:10px;font-weight:700;padding:2px 8px;border-radius:12px}
+.card-row-weight{font-family:'Cinzel',serif;font-size:11px;color:var(--dim);min-width:40px;text-align:right}
+.add-card-row{display:flex;gap:8px;align-items:flex-start;margin-bottom:8px;flex-wrap:wrap}
+.add-card-row input,.add-card-row select{flex:1;min-width:80px;padding:8px 10px;font-size:14px}
+.weight-hint{font-size:11px;color:var(--dim);padding:6px 10px;background:var(--surface2);border-radius:8px;margin-bottom:10px;line-height:1.6}
+
+/* ── Account cards ── */
+.account-card{background:var(--surface);border:1px solid var(--border);border-radius:14px;overflow:hidden;margin-bottom:12px}
+.account-band{height:3px;background:linear-gradient(90deg,var(--gold2),var(--gold))}
+.account-header-row{padding:12px 14px;display:flex;align-items:center;justify-content:space-between;cursor:pointer;user-select:none;transition:background .15s}
+.account-header-row:active{background:var(--surface2)}
+.account-name{font-family:'Cinzel',serif;font-size:15px;font-weight:700}
+.account-body{padding:0 14px 14px;display:none}
+.history-pack{background:var(--surface2);border-radius:10px;padding:10px 12px;margin-bottom:8px}
+.history-pack-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:8px}
+.history-pack-set{font-family:'Cinzel',serif;font-size:12px;color:var(--accent)}
+.history-pack-date{font-size:11px;color:var(--dim)}
+.history-cards{display:flex;gap:6px;flex-wrap:wrap}
+.history-chip{font-family:'Cinzel',serif;font-size:10px;font-weight:700;padding:3px 9px;border-radius:20px}
+</style>
+</head>
+<body>
+<div id="app">
+  <header>
+    <div class="header-inner">
+      <div class="logo">
+        <div class="logo-icon">S</div>
+        <div class="logo-text">PACK OPENER</div>
+      </div>
+      <nav id="nav" style="display:none">
+        <button class="tab-btn active" onclick="switchTab('open')">🎴 開封</button>
+        <button class="tab-btn" onclick="switchTab('sets')">📦 弾</button>
+        <button class="tab-btn" onclick="switchTab('accounts')">👤 履歴</button>
+      </nav>
+    </div>
+  </header>
+  <main id="main">
+    <div class="loading-screen" id="loading-screen">
+      <div class="spinner" style="width:28px;height:28px;border-width:3px"></div>
+      <span>読み込み中…</span>
+    </div>
+  </main>
+</div>
+
+<script type="module">
+import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.14.0/firebase-app.js'
+import {
+  getFirestore, collection, addDoc, updateDoc, deleteDoc,
+  doc, onSnapshot, orderBy, query, serverTimestamp, arrayUnion
+} from 'https://www.gstatic.com/firebasejs/10.14.0/firebase-firestore.js'
+
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+//  State
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+let db = null
+let sets = []
+let accounts = []
+let currentTab = 'open'
+let _packCount = 1
+let _selectedSet = null
+let _selectedAccount = null
+let _expandedSets = new Set()
+let _expandedAccounts = new Set()
+const $ = id => document.getElementById(id)
+
+const FIREBASE_CONFIG = {
+  apiKey: "AIzaSyB6KWO6B5fed2PQ0EhNOyIhSPB5HZ2Wypo",
+  authDomain: "new-search-aa.firebaseapp.com",
+  projectId: "new-search-aa",
+  storageBucket: "new-search-aa.firebasestorage.app",
+  messagingSenderId: "524952551558",
+  appId: "1:524952551558:web:cc57b3b73d3ae7b7dd9107"
+}
+
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+//  Boot
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+function debugLog(); boot() {
+  try {
+    const app = initializeApp(FIREBASE_CONFIG, 'pack-app')
+    db = getFirestore(app)
+    $('nav').style.display = 'flex'
+    startListeners()
+  } catch(e) {
+    $('main').innerHTML = `<div class="empty"><div class="empty-icon">⚠️</div><p>Firebase接続エラー</p><small>${e.message}</small></div>`
+  }
+}
+
+function startListeners() {
+  renderOpen()
+  onSnapshot(query(collection(db,'pack_sets'), orderBy('createdAt','asc')), snap => {
+    sets = snap.docs.map(d=>({id:d.id,...d.data()}))
+    if(currentTab==='open') renderOpen()
+    else if(currentTab==='sets') renderSets()
+  })
+  onSnapshot(query(collection(db,'pack_accounts'), orderBy('createdAt','asc')), snap => {
+    accounts = snap.docs.map(d=>({id:d.id,...d.data()}))
+    if(currentTab==='open') renderOpen()
+    else if(currentTab==='accounts') renderAccounts()
+  })
+}
+
+window.switchTab = function(tab) {
+  currentTab = tab
+  document.querySelectorAll('.tab-btn').forEach(b=>b.classList.remove('active'))
+  event.currentTarget.classList.add('active')
+  if(tab==='open') renderOpen()
+  else if(tab==='sets') renderSets()
+  else renderAccounts()
+}
+
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+//  OPEN tab
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+function renderOpen() {
+  const setOpts = sets.length===0
+    ? `<option value="">弾がありません</option>`
+    : `<option value="">弾を選択…</option>` + sets.map(s=>`<option value="${s.id}" ${_selectedSet===s.id?'selected':''}>${esc(s.name)}（${(s.cards||[]).length}種）</option>`).join('')
+
+  const accOpts = accounts.length===0
+    ? `<option value="">アカウントがありません</option>`
+    : `<option value="">アカウントを選択…</option>` + accounts.map(a=>`<option value="${a.id}" ${_selectedAccount===a.id?'selected':''}>${esc(a.name)}</option>`).join('')
+
+  const packBtns = [1,2,3,4,5,6,7,8,9,10].map(n=>`
+    <button class="pack-count-btn ${_packCount===n?'active':''}" onclick="setPackCount(${n})">${n}</button>
+  `).join('')
+
+  const canOpen = _selectedSet && _selectedAccount && sets.find(s=>s.id===_selectedSet)?.cards?.length >= 1
+
+  $('main').innerHTML = `
+  <div class="section-header" style="margin-bottom:20px">
+    <div>
+      <div class="section-title">🎴 パック開封</div>
+      <div style="font-size:13px;color:var(--muted);margin-top:3px">1パック5枚・最大10パック</div>
+    </div>
+  </div>
+
+  <div class="opener-card">
+    <div class="opener-title">▸ アカウント</div>
+    <select onchange="setAccount(this.value)">${accOpts}</select>
+    ${accounts.length===0?`<div style="font-size:12px;color:var(--dim);margin-top:6px">👤タブからアカウントを追加してください</div>`:''}
+  </div>
+
+  <div class="opener-card">
+    <div class="opener-title">▸ 弾</div>
+    <select onchange="setSelectedSet(this.value)">${setOpts}</select>
+    ${sets.length===0?`<div style="font-size:12px;color:var(--dim);margin-top:6px">📦タブから弾を追加してください</div>`:''}
+  </div>
+
+  <div class="opener-card">
+    <div class="opener-title">▸ パック数</div>
+    <div class="pack-count-row">${packBtns}</div>
+    <div style="font-size:12px;color:var(--dim);margin-top:6px">${_packCount}パック = ${_packCount*5}枚</div>
+  </div>
+
+  <button class="open-btn ${canOpen?'':'disabled'}" id="open-btn" onclick="startOpening()" ${canOpen?'':'disabled'}>
+    ✦ 開封する ✦
+  </button>`
+}
+
+window.setPackCount = function(n) { _packCount=n; renderOpen() }
+window.setAccount = function(v) { _selectedAccount=v||null; renderOpen() }
+window.setSelectedSet = function(v) { _selectedSet=v||null; renderOpen() }
+
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+//  Weighted random
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+function weightedPick(cards) {
+  const total = cards.reduce((s,c)=>s+(Number(c.weight)||1),0)
+  let r = Math.random() * total
+  for(const c of cards) {
+    r -= (Number(c.weight)||1)
+    if(r <= 0) return c
+  }
+  return cards[cards.length-1]
+}
+
+function pullPack(cards) {
+  const result = []
+  for(let i=0;i<5;i++) result.push(weightedPick(cards))
+  return result
+}
+
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+//  Opening animation
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+window.startOpening = async function() {
+  const setData = sets.find(s=>s.id===_selectedSet)
+  if(!setData || !setData.cards?.length) return
+
+  const allPulled = [] // [{name,rarity}, ...] for saving
+  const packsData = []
+  for(let i=0;i<_packCount;i++) packsData.push(pullPack(setData.cards))
+  allPulled.push(...packsData.flat())
+
+  // Save to history
+  const account = accounts.find(a=>a.id===_selectedAccount)
+  try {
+    await addDoc(collection(db,'pack_history'), {
+      accountId: _selectedAccount,
+      accountName: account?.name||'',
+      setId: _selectedSet,
+      setName: setData.name,
+      packs: packsData,
+      pulledAt: serverTimestamp()
+    })
+    // Update account pull count
+    await updateDoc(doc(db,'pack_accounts',_selectedAccount), {
+      totalPacks: (account?.totalPacks||0) + _packCount,
+      totalCards: (account?.totalCards||0) + _packCount*5
+    })
+  } catch(e) { console.error('Save failed:', e) }
+
+  showReveal(packsData, setData.name)
+}
+
+function rarityKey(rarity) {
+  const r = (rarity||'').toLowerCase()
+  if(r==='n'||r==='ノーマル'||r==='normal') return 'n'
+  if(r==='r'||r==='レア'||r==='rare') return 'r'
+  if(r==='sr'||r==='スーパーレア') return 'sr'
+  if(r==='vr'||r==='ヴイレア'||r==='veryrare') return 'vr'
+  if(r==='sr'||r==='スーパーレア') return 'sr'
+  if(r==='lgr'||r==='legendrare'||r==='レジェンドレア') return 'lgr'
+  if(r==='ur'||r==='ウルトラレア') return 'ur'
+  return 'default'
+}
+
+function showReveal(packsData, setName) {
+  const overlay = document.createElement('div')
+  overlay.className = 'reveal-overlay'
+  overlay.id = 'reveal-overlay'
+
+  let currentPack = 0
+  let flipIndex = 0
+  let autoFlipTimer = null
+
+  function buildPackHTML(packCards, packNum) {
+    const cardsHtml = packCards.map((c,i)=>{
+      const rk = rarityKey(c.rarity)
+      return `
+      <div class="flip-card" id="fc-${i}" onclick="flipCard(${i})">
+        <div class="flip-card-inner">
+          <div class="flip-card-front">
+            <div class="flip-card-front-inner">🃏</div>
+          </div>
+          <div class="flip-card-back glow-${rk}">
+            <div class="flip-card-rarity r-${rk}">${esc(c.rarity||'?')}</div>
+            <div class="flip-card-name">${esc(c.name)}</div>
+          </div>
+        </div>
+      </div>`
+    }).join('')
+
+    const isLast = packNum === packsData.length - 1
+    return `
+    <div class="reveal-header">${esc(setName)} — パック ${packNum+1} / ${packsData.length}</div>
+    <div class="pack-label">カードをタップして開封</div>
+    <div class="cards-stage">${cardsHtml}</div>
+    <div class="reveal-actions">
+      <button class="reveal-skip" onclick="skipReveal()">全て開く</button>
+      <button class="reveal-done" id="reveal-done-btn" onclick="${isLast?'closeReveal()':'nextPack()'}">${isLast?'✦ 閉じる':'次のパック →'}</button>
+    </div>`
+  }
+
+  function renderPack(packNum) {
+    flipIndex = 0
+    clearTimeout(autoFlipTimer)
+    overlay.innerHTML = buildPackHTML(packsData[packNum], packNum)
+    // expose functions to onclick attrs
+    window.flipCard = function(i) {
+      const card = document.getElementById(`fc-${i}`)
+      if(!card || card.classList.contains('flipped')) return
+      card.classList.add('flipped')
+      flipIndex = Math.max(flipIndex, i+1)
+      checkAllFlipped()
+    }
+    window.skipReveal = function() {
+      clearTimeout(autoFlipTimer)
+      for(let i=0;i<5;i++) {
+        const card = document.getElementById(`fc-${i}`)
+        if(card) card.classList.add('flipped')
+      }
+      checkAllFlipped()
+    }
+    window.nextPack = function() {
+      currentPack++
+      if(currentPack < packsData.length) renderPack(currentPack)
+    }
+    window.closeReveal = function() {
+      overlay.remove()
+    }
+    // Auto-flip one by one with sparkle after short delay
+    autoFlipSequence()
+  }
+
+  function autoFlipSequence() {
+    let i = 0
+    function flipNext() {
+      if(i >= 5) { checkAllFlipped(); return }
+      const card = document.getElementById(`fc-${i}`)
+      if(card && !card.classList.contains('flipped')) card.classList.add('flipped')
+      i++
+      autoFlipTimer = setTimeout(flipNext, 320)
+    }
+    autoFlipTimer = setTimeout(flipNext, 600)
+  }
+
+  function checkAllFlipped() {
+    const all = overlay.querySelectorAll('.flip-card')
+    const allFlipped = [...all].every(c=>c.classList.contains('flipped'))
+    const doneBtn = overlay.querySelector('#reveal-done-btn')
+    if(allFlipped && doneBtn) doneBtn.style.display = 'block'
+  }
+
+  document.body.appendChild(overlay)
+  renderPack(0)
+}
+
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+//  SETS tab
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+function renderSets() {
+  const setsHtml = sets.length===0 ? `
+  <div class="empty">
+    <div class="empty-icon">📦</div>
+    <p>弾がありません</p>
+    <small>下のボタンから追加してください</small>
+  </div>` : sets.map(s=>setCardHTML(s)).join('')
+
+  $('main').innerHTML = `
+  <div class="section-header">
+    <div>
+      <div class="section-title">📦 弾管理</div>
+      <div style="font-size:13px;color:var(--muted);margin-top:3px">カードリストと確率を設定</div>
+    </div>
+  </div>
+  ${setsHtml}
+  <div style="position:sticky;bottom:calc(16px + env(safe-area-inset-bottom));display:flex;justify-content:center;margin-top:16px">
+    <button class="btn btn-primary" onclick="openAddSet()">＋ 弾を追加</button>
+  </div>`
+}
+
+function setCardHTML(s) {
+  const cards = s.cards||[]
+  const isOpen = _expandedSets.has(s.id)
+  const totalWeight = cards.reduce((t,c)=>t+(Number(c.weight)||1),0)
+
+  const cardsHtml = cards.length===0
+    ? `<p style="font-size:12px;color:var(--dim);padding:8px 0">カードがありません</p>`
+    : cards.map((c,i)=>{
+      const rk = rarityKey(c.rarity)
+      const pct = totalWeight>0?((Number(c.weight)||1)/totalWeight*100).toFixed(1):'?'
+      return `
+      <div class="card-row">
+        <div class="card-row-name">${esc(c.name)}</div>
+        <div class="card-row-rarity r-${rk}">${esc(c.rarity||'?')}</div>
+        <div class="card-row-weight">${c.weight} <span style="color:var(--dim)">(${pct}%)</span></div>
+        <button class="btn btn-sm btn-danger" style="padding:4px 8px;font-size:11px" onclick="event.stopPropagation();removeCard('${s.id}',${i})">✕</button>
+      </div>`
+    }).join('')
+
+  return `
+  <div class="set-card">
+    <div class="set-band"></div>
+    <div class="set-header-row" onclick="toggleSet('${s.id}')">
+      <div class="set-name">📦 ${esc(s.name)}</div>
+      <div style="display:flex;align-items:center;gap:8px">
+        <span class="set-meta">${cards.length}種</span>
+        <button class="btn btn-sm btn-danger" style="padding:4px 8px" onclick="event.stopPropagation();openDeleteSet('${s.id}','${esc(s.name)}')">🗑</button>
+        <span id="set-chevron-${s.id}" style="color:var(--muted);font-size:11px;width:14px;text-align:center">${isOpen?'▲':'▼'}</span>
+      </div>
+    </div>
+    <div id="set-body-${s.id}" style="display:${isOpen?'block':'none'}">
+      <div style="padding:0 14px 14px">
+        <div style="font-family:'Cinzel',serif;font-size:11px;color:var(--dim);margin-bottom:8px;margin-top:2px">カードリスト（ウェイト高 = 出やすい）</div>
+        ${cardsHtml}
+        <div style="margin-top:12px;padding-top:10px;border-top:1px solid var(--border)">
+          <button class="btn btn-sm btn-ghost" style="width:100%" onclick="openAddCardToSet('${s.id}')">＋ カードを追加</button>
+        </div>
+      </div>
+    </div>
+  </div>`
+}
+
+window.toggleSet = function(id) {
+  if(_expandedSets.has(id)) _expandedSets.delete(id)
+  else _expandedSets.add(id)
+  const body = $(`set-body-${id}`)
+  const chev = $(`set-chevron-${id}`)
+  const open = _expandedSets.has(id)
+  if(body) body.style.display = open?'block':'none'
+  if(chev) chev.textContent = open?'▲':'▼'
+}
+
+window.openAddSet = function() {
+  showModal(`
+  <div class="modal-handle"></div>
+  <div class="modal-title">📦 弾を追加</div>
+  <div class="form-group"><label>弾の名前 *</label><input id="sn_name" placeholder="例：第一弾 覚醒の刻"></div>
+  <p id="sn-err" class="error-msg" style="display:none"></p>
+  <div class="modal-actions">
+    <button class="btn btn-ghost" onclick="closeModal()">キャンセル</button>
+    <button class="btn btn-primary" id="sn-submit" onclick="submitAddSet()">✦ 追加する</button>
+  </div>`)
+  setTimeout(()=>$('sn_name')?.focus(),100)
+}
+
+window.submitAddSet = async function() {
+  const name = $('sn_name').value.trim()
+  if(!name){$('sn-err').textContent='名前を入力してください';$('sn-err').style.display='block';return}
+  const btn=$('sn-submit');btn.disabled=true;btn.innerHTML='<div class="spinner"></div>'
+  try {
+    const ref = await addDoc(collection(db,'pack_sets'),{name, cards:[], createdAt:serverTimestamp()})
+    _expandedSets.add(ref.id)
+    closeModal()
+  } catch(e){$('sn-err').textContent='保存に失敗: '+e.message;$('sn-err').style.display='block';btn.disabled=false;btn.innerHTML='✦ 追加する'}
+}
+
+window.openAddCardToSet = function(setId) {
+  showModal(`
+  <div class="modal-handle"></div>
+  <div class="modal-title">🃏 カードをまとめて追加</div>
+  <div class="weight-hint">
+    <b style="color:var(--muted)">使い方</b><br>
+    先にレアリティを指定して、下に1行ずつカード名を書いてください。<br>
+    例：<br>
+    カラス🟥<br>
+    ライオン🟦<br>
+    キリン🟩
+  </div>
+  <div class="form-group">
+    <label>レアリティ *</label>
+    <input id="ac_rarity" placeholder="例: LGR / SR / VR / R / U / C">
+  </div>
+  <div class="form-group">
+    <label>カード名（1行ずつ） *</label>
+    <textarea id="ac_names" rows="8" placeholder="カラス🟥
+ライオン🟦
+キリン🟩"></textarea>
+  </div>
+  <div class="form-group">
+    <label>ウェイト *</label>
+    <input type="number" id="ac_weight" value="10" min="1" placeholder="1以上の整数">
+  </div>
+  <p id="ac-err" class="error-msg" style="display:none"></p>
+  <div class="modal-actions">
+    <button class="btn btn-ghost" onclick="closeModal()">キャンセル</button>
+    <button class="btn btn-primary" id="ac-submit" onclick="submitAddCardToSet('${setId}')">＋ まとめて追加</button>
+  </div>`)
+  setTimeout(()=>$('ac_rarity')?.focus(),100)
+}
+
+window.submitAddCardToSet = async function(setId) {
+  const rarity = $('ac_rarity').value.trim()
+  const namesText = $('ac_names').value.trim()
+  const weight = parseInt($('ac_weight').value)||0
+  const errEl = $('ac-err')
+  if(!rarity){errEl.textContent='レアリティを入力してください';errEl.style.display='block';return}
+  if(!namesText){errEl.textContent='カード名を1行ずつ入力してください';errEl.style.display='block';return}
+  if(weight<1){errEl.textContent='ウェイトは1以上にしてください';errEl.style.display='block';return}
+  const names = namesText.split(/
++/).map(s=>s.trim()).filter(Boolean)
+  if(!names.length){errEl.textContent='カード名を1行ずつ入力してください';errEl.style.display='block';return}
+  const btn=$('ac-submit');btn.disabled=true;btn.innerHTML='<div class="spinner"></div>'
+  const setData = sets.find(s=>s.id===setId)
+  const newCards = [...(setData?.cards||[]), ...names.map(name => ({name, rarity, weight}))]
+  try {
+    await updateDoc(doc(db,'pack_sets',setId),{cards:newCards})
+    closeModal()
+  } catch(e){errEl.textContent='保存に失敗: '+e.message;errEl.style.display='block';btn.disabled=false;btn.innerHTML='＋ まとめて追加'}
+}
+
+window.removeCard = async function(setId, index) {
+  const setData = sets.find(s=>s.id===setId)
+  if(!setData) return
+  const newCards = [...(setData.cards||[])]
+  newCards.splice(index,1)
+  try { await updateDoc(doc(db,'pack_sets',setId),{cards:newCards}) }
+  catch(e){ alert('削除に失敗: '+e.message) }
+}
+
+window.openDeleteSet = function(id, name) {
+  showModal(`
+  <div class="modal-handle"></div>
+  <div class="modal-title" style="color:var(--red)">⚠ 弾を削除</div>
+  <p style="color:var(--muted);font-size:15px;margin-bottom:16px"><strong style="color:var(--text)">「${name}」</strong>を削除します。この操作は取り消せません。</p>
+  <p id="ds-err" class="error-msg" style="display:none"></p>
+  <div class="modal-actions">
+    <button class="btn btn-ghost" onclick="closeModal()">キャンセル</button>
+    <button class="btn btn-danger" onclick="submitDeleteSet('${id}')">🗑 削除する</button>
+  </div>`)
+}
+
+window.submitDeleteSet = async function(id) {
+  const btn=event.currentTarget;btn.disabled=true;btn.innerHTML='削除中…'
+  try{await deleteDoc(doc(db,'pack_sets',id));closeModal()}
+  catch(e){$('ds-err').textContent='削除に失敗: '+e.message;$('ds-err').style.display='block';btn.disabled=false;btn.innerHTML='🗑 削除する'}
+}
+
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+//  ACCOUNTS tab
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+function renderAccounts() {
+  // historyはリアルタイムでとってないのでアカウントごとにlisten
+  const html = accounts.length===0 ? `
+  <div class="empty">
+    <div class="empty-icon">👤</div>
+    <p>アカウントがいません</p>
+    <small>下のボタンから追加してください</small>
+  </div>` : accounts.map(a=>accountCardHTML(a)).join('')
+
+  $('main').innerHTML = `
+  <div class="section-header">
+    <div>
+      <div class="section-title">👤 アカウント</div>
+      <div style="font-size:13px;color:var(--muted);margin-top:3px">引いた履歴を確認</div>
+    </div>
+  </div>
+  ${html}
+  <div style="position:sticky;bottom:calc(16px + env(safe-area-inset-bottom));display:flex;justify-content:center;margin-top:16px">
+    <button class="btn btn-primary" onclick="openAddAccount()">＋ アカウント追加</button>
+  </div>`
+}
+
+function accountCardHTML(a) {
+  const isOpen = _expandedAccounts.has(a.id)
+  return `
+  <div class="account-card">
+    <div class="account-band"></div>
+    <div class="account-header-row" onclick="toggleAccount('${a.id}')">
+      <div style="flex:1">
+        <div class="account-name">👤 ${esc(a.name)}</div>
+        <div style="font-size:12px;color:var(--dim);margin-top:2px;font-family:'Cinzel',serif">
+          計 ${a.totalPacks||0} パック / ${a.totalCards||0} 枚
+        </div>
+      </div>
+      <div style="display:flex;align-items:center;gap:6px">
+        <button class="btn btn-sm btn-danger" style="padding:4px 8px" onclick="event.stopPropagation();openDeleteAccount('${a.id}','${esc(a.name)}')">🗑</button>
+        <span id="acc-chevron-${a.id}" style="color:var(--muted);font-size:11px;width:14px;text-align:center">${isOpen?'▲':'▼'}</span>
+      </div>
+    </div>
+    <div id="acc-body-${a.id}" style="display:${isOpen?'block':'none'}">
+      <div style="padding:0 14px 14px">
+        <div id="acc-history-${a.id}" style="font-family:'Cinzel',serif;font-size:12px;color:var(--dim)">読み込み中…</div>
+      </div>
+    </div>
+  </div>`
+}
+
+window.toggleAccount = function(id) {
+  if(_expandedAccounts.has(id)) {
+    _expandedAccounts.delete(id)
+  } else {
+    _expandedAccounts.add(id)
+    loadAccountHistory(id)
+  }
+  const body = $(`acc-body-${id}`)
+  const chev = $(`acc-chevron-${id}`)
+  const open = _expandedAccounts.has(id)
+  if(body) body.style.display = open?'block':'none'
+  if(chev) chev.textContent = open?'▲':'▼'
+}
+
+const _historyListeners = {}
+function loadAccountHistory(accountId) {
+  if(_historyListeners[accountId]) return // already listening
+  _historyListeners[accountId] = onSnapshot(
+    query(collection(db,'pack_history'),orderBy('pulledAt','desc')),
+    snap => {
+      const histories = snap.docs
+        .map(d=>({id:d.id,...d.data()}))
+        .filter(h=>h.accountId===accountId)
+      const el = $(`acc-history-${accountId}`)
+      if(!el) return
+      if(histories.length===0) {
+        el.innerHTML = '<p style="color:var(--dim);font-size:12px;text-align:center;padding:8px">履歴なし</p>'
+        return
+      }
+      el.innerHTML = histories.slice(0,30).map(h=>{
+        const date = h.pulledAt?.toDate ? h.pulledAt.toDate().toLocaleDateString('ja-JP') : ''
+        const packs = h.packs||[]
+        const allCards = packs.flat()
+        // count by rarity for summary
+        const rarityCounts = {}
+        allCards.forEach(c=>{ rarityCounts[c.rarity]=(rarityCounts[c.rarity]||0)+1 })
+        const rarityChips = Object.entries(rarityCounts).map(([r,n])=>{
+          const rk = rarityKey(r)
+          return `<span class="history-chip r-${rk}">${esc(r)}×${n}</span>`
+        }).join('')
+        const cardChips = allCards.map(c=>{
+          const rk = rarityKey(c.rarity)
+          return `<span class="history-chip r-${rk}">${esc(c.name)}</span>`
+        }).join('')
+        return `
+        <div class="history-pack">
+          <div class="history-pack-header">
+            <span class="history-pack-set">📦 ${esc(h.setName)} ×${packs.length}パック</span>
+            <span class="history-pack-date">${date}</span>
+          </div>
+          <div style="margin-bottom:6px;display:flex;gap:4px;flex-wrap:wrap">${rarityChips}</div>
+          <div style="display:flex;gap:4px;flex-wrap:wrap">${cardChips}</div>
+        </div>`
+      }).join('')
+    }
+  )
+}
+
+window.openAddAccount = function() {
+  showModal(`
+  <div class="modal-handle"></div>
+  <div class="modal-title">👤 アカウント追加</div>
+  <div class="form-group"><label>名前 *</label><input id="na_name" placeholder="例：たかし"></div>
+  <p id="na-err" class="error-msg" style="display:none"></p>
+  <div class="modal-actions">
+    <button class="btn btn-ghost" onclick="closeModal()">キャンセル</button>
+    <button class="btn btn-primary" id="na-submit" onclick="submitAddAccount()">✦ 追加する</button>
+  </div>`)
+  setTimeout(()=>$('na_name')?.focus(),100)
+}
+
+window.submitAddAccount = async function() {
+  const name = $('na_name').value.trim()
+  if(!name){$('na-err').textContent='名前を入力してください';$('na-err').style.display='block';return}
+  if(accounts.find(a=>a.name===name)){$('na-err').textContent='同じ名前が既にあります';$('na-err').style.display='block';return}
+  const btn=$('na-submit');btn.disabled=true;btn.innerHTML='<div class="spinner"></div>'
+  try {
+    await addDoc(collection(db,'pack_accounts'),{name, totalPacks:0, totalCards:0, createdAt:serverTimestamp()})
+    closeModal()
+  } catch(e){$('na-err').textContent='保存に失敗: '+e.message;$('na-err').style.display='block';btn.disabled=false;btn.innerHTML='✦ 追加する'}
+}
+
+window.openDeleteAccount = function(id, name) {
+  showModal(`
+  <div class="modal-handle"></div>
+  <div class="modal-title" style="color:var(--red)">⚠ アカウント削除</div>
+  <p style="color:var(--muted);font-size:15px;margin-bottom:16px"><strong style="color:var(--text)">「${name}」</strong>を削除します。</p>
+  <p id="da-err" class="error-msg" style="display:none"></p>
+  <div class="modal-actions">
+    <button class="btn btn-ghost" onclick="closeModal()">キャンセル</button>
+    <button class="btn btn-danger" onclick="submitDeleteAccount('${id}')">🗑 削除する</button>
+  </div>`)
+}
+
+window.submitDeleteAccount = async function(id) {
+  const btn=event.currentTarget;btn.disabled=true;btn.innerHTML='削除中…'
+  try{await deleteDoc(doc(db,'pack_accounts',id));closeModal()}
+  catch(e){$('da-err').textContent='削除に失敗: '+e.message;$('da-err').style.display='block';btn.disabled=false;btn.innerHTML='🗑 削除する'}
+}
+
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+//  Modal helpers
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+function showModal(html) {
+  const overlay = document.createElement('div')
+  overlay.className='modal-overlay'
+  overlay.id='modal-overlay'
+  overlay.innerHTML=`<div class="modal">${html}</div>`
+  overlay.addEventListener('click', e=>{ if(e.target===overlay) closeModal() })
+  document.body.appendChild(overlay)
+}
+window.closeModal = function() {
+  const el=$('modal-overlay'); if(el) el.remove()
+}
+
+function esc(s){ const d=document.createElement('div');d.textContent=String(s??'');return d.innerHTML }
+
+debugLog(); boot()
+</script>
+</body>
+</html>
